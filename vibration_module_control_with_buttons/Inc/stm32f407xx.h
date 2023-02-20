@@ -21,7 +21,7 @@
 #define TIM12_BASEADDR 		(APB1PERIPHERAL_BASE_ADDR + 0x1800)
 #define TIM13_BASEADDR 		(APB1PERIPHERAL_BASE_ADDR + 0x1C00)
 #define TIM14_BASEADDR 		(APB1PERIPHERAL_BASE_ADDR + 0x2000)
-#define RTC_BKP_BASEADDR 	(APB1PERIPHERAL_BASE_ADDR + 0x2800)//4 - 55:52
+#define RTC_BKP_BASEADDR 	(APB1PERIPHERAL_BASE_ADDR + 0x2800)
 #define WWDG_BASEADDR 		(APB1PERIPHERAL_BASE_ADDR + 0x2C00)
 #define IWDG_BASEADDR 		(APB1PERIPHERAL_BASE_ADDR + 0x3000)
 #define I2S2ext_BASEADDR 	(APB1PERIPHERAL_BASE_ADDR + 0x2C00)
@@ -82,8 +82,7 @@
 #define DCMI_BASEADDR 				(AHB2PERIPHERAL_BASE_ADDR + 0x0000)
 #define RNG_BASEADDR 				(AHB2PERIPHERAL_BASE_ADDR + 0x10800)
 
-//ahb3
-//#define _BASEADDR 				(AHB3PERIPHERAL_BASE_ADDR + 0x) //4 - 1:22:00
+
 
 
 //IRQ Numbers
@@ -91,7 +90,7 @@
 #define IRQ_EXTI1				7
 #define IRQ_EXTI2				8
 #define IRQ_EXTI3				9
-#define IRQ_EXTI4				10  //bu doğru mu kontrol et
+#define IRQ_EXTI4				10
 #define IRQ_EXTI9_5				23
 #define IRQ_EXTI15_10			40
 
@@ -102,7 +101,6 @@
 
 
 typedef struct{
-//1:36:34. dkakika //referance manual sf 211
 	volatile uint32_t	CR;
 	volatile uint32_t	PLLCFGR;
 	volatile uint32_t	CFGR;
@@ -166,7 +164,7 @@ typedef struct{
 	volatile uint32_t EXTICR[4];
 	//0x14 + 0x4 = 0x18 reserve
 	//0x18 + 0x4 = 0x1c reserve
-	//0x1c + 0x4 = 0x20 cmpcr olacak
+	//0x1c + 0x4 = 0x20 cmpcr
 	uint32_t RESERVED0[2];
 	volatile uint32_t CMPCR;
 }SYSCFG_RegDef_t;
@@ -204,12 +202,6 @@ typedef struct{
 }TIM_RegDef_t;
 
 
-
-
-
-
-
-
 #define 	GPIOA					((GPIO_RegDef_t*)GPIOA_BASEADDR)
 #define 	GPIOB					((GPIO_RegDef_t*)GPIOB_BASEADDR)
 #define 	GPIOC					((GPIO_RegDef_t*)GPIOC_BASEADDR)
@@ -237,7 +229,6 @@ typedef struct{
 #define		TIMER9					((TIM_RegDef_t *) TIM9_BASEADDR)
 #define		TIMER10					((TIM_RegDef_t *) TIM10_BASEADDR)
 #define		TIMER11					((TIM_RegDef_t *) TIM11_BASEADDR)
-//daha fazla varsa tanımla timerları
 
 #define GPIOA_CLOCK_ENABLE()		(RCC->AHB1ENR |=(1<<0))
 #define GPIOB_CLOCK_ENABLE()		(RCC->AHB1ENR |=(1<<1))
@@ -295,18 +286,6 @@ typedef struct{
 #define USART6		((USART_RegDef_t*) USART6_BASEADDR)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 //ADC
 
 typedef struct{
@@ -337,11 +316,6 @@ typedef struct{
 
 
 
-
-
-
-
-
 //I2C
 typedef struct{
 	volatile uint32_t CR1;
@@ -359,7 +333,6 @@ typedef struct{
 #define I2C1		((I2C_RegDef_t *) I2C1_BASEADDR)
 #define I2C2		((I2C_RegDef_t *) I2C2_BASEADDR)
 #define I2C3		((I2C_RegDef_t *) I2C3_BASEADDR)
-
 
 
 #endif

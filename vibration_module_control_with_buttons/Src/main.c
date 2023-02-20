@@ -16,116 +16,69 @@
  ******************************************************************************
  */
 
+
+/*
+ * Seven segment Pin A:PC7
+ * Seven segment Pin B:PC6
+ * Seven segment Pin C:PA9
+ * Seven segment Pin D:PA10
+ * Seven segment Pin E:PA8
+ * Seven segment Pin F:PC9
+ * Seven segment Pin G:PC8
+ *
+ * Vibration Motor Module PWM Pin: PA5
+ *
+ * Button Level UP	:PB0
+ * Button Level DOWn:PB1
+ *
+ */
+
 #include <stdint.h>
 #include "stm32f407xx.h"
 #include "gpio.h"
 #include "timer.h"
 #include "coreM4.h"
-
-
-void GPIO_Init(void);
-void TIM2_Init(void);
-void TIM4_ms_Delay(uint32_t delay);
+#include "sevenSegment.h"
 
 int tmTickCount=0;
-
 int8_t nmbr=0;
-uint8_t numbers_of_7segment[10]={
-			0x3f,
-			0x06,
-			0x5b,
-			0x4f,
-			0x66,
-			0x6d,
-			0x7d,
-			0x07,
-			0x7f,
-			0x6f
-	};
-
-void update_of_7segment(uint8_t number){
-	gpio_writeto_output_pin(GPIOC,GPIO_PIN_NO_7, ((number>>0)&0x01));
-	gpio_writeto_output_pin(GPIOC,GPIO_PIN_NO_6, ((number>>1)&0x01));
-	gpio_writeto_output_pin(GPIOA,GPIO_PIN_NO_9, ((number>>2)&0x01));
-	gpio_writeto_output_pin(GPIOA,GPIO_PIN_NO_10, ((number>>3)&0x01));
-	gpio_writeto_output_pin(GPIOA,GPIO_PIN_NO_8, ((number>>4)&0x01));
-	gpio_writeto_output_pin(GPIOC,GPIO_PIN_NO_9, ((number>>5)&0x01));
-	gpio_writeto_output_pin(GPIOC,GPIO_PIN_NO_8,((number>>6)&0x01));
-}
-
 
 void SysTick_Handler(){
 	++tmTickCount;
-	//gpio_toggleto_output_pin(GPIOD, GPIO_PIN_NO_14);////////////
 }
 
 void EXTI0_IRQHandler(void){
-
 	static int inTimeOld;
 	clear_pending_reg(GPIO_PIN_NO_0);
 	if(tmTickCount-inTimeOld>=3){
-		gpio_toggleto_output_pin(GPIOD, GPIO_PIN_NO_15);////////////
+		gpio_toggleto_output_pin(GPIOD, GPIO_PIN_NO_15);////////////Button Press indicator
 		inTimeOld=tmTickCount;
 		if(nmbr<9){
 			nmbr++;
-			update_of_7segment(numbers_of_7segment[nmbr]);
-			TIMER2->CCR1 = nmbr*2222;
+			update_of_7segment(nmbr);
+			TIMER2->CCR1 = nmbr*2222*3;
 		}
 	}
 }
 
 void EXTI1_IRQHandler(void){
-
 	static int inTimeOld;
 	clear_pending_reg(GPIO_PIN_NO_1);
 	if(tmTickCount-inTimeOld>=3){
-		gpio_toggleto_output_pin(GPIOD, GPIO_PIN_NO_15);////////////
+		gpio_toggleto_output_pin(GPIOD, GPIO_PIN_NO_15);////////////Button Press indicator
 		inTimeOld=tmTickCount;
 		if(nmbr>0){
 			nmbr--;
-			update_of_7segment(numbers_of_7segment[nmbr]);
-			TIMER2->CCR1 = nmbr*2222;
+			update_of_7segment(nmbr);
+			TIMER2->CCR1 = nmbr*2222*3;
 		}
 	}
 }
 
 
-
-
-
-
-void GPIO_Init(){
-	RCC->AHB1ENR |= 1; //Enable GPIOA clock
-	GPIOA->AFR[0] |= 0x00100000; // Select the PA5 pin in alternate function mode
-	GPIOA->MODER |= 0x00000800; //Set the PA5 pin alternate function
-}
-
-void TIM2_Init(){
-	RCC->APB1ENR |=1;
-	TIMER2->PSC = 16-1; //Setting the clock frequency to 1MHz.
-	TIMER2->ARR = 20000-1; // Total period of the timer
-	TIMER2->CNT = 0;
-	TIMER2->CCMR1 = 0x0060; //PWM mode for the timer
-	TIMER2->CCER |= 1; //Enable channel 1 as output
-	TIMER2->CCR1 = 500; // Pulse width for PWM
-}
-
-void TIM4_ms_Delay(uint32_t delay){
-	RCC->APB1ENR |= 1<<2; //Start the clock for the timer peripheral
-	TIMER4->PSC = 16000-1; //Setting the clock frequency to 1kHz.
-	TIMER4->ARR = (delay); // Total period of the timer
-	TIMER4->CNT = 0;
-	TIMER4->CR1 |= 1; //Start the Timer
-	while(!(TIMER4->SR & (0x1UL << (0U)))){} //Polling the update interrupt flag
-	TIMER4->SR &= ~(0x0001); //Reset the update interrupt flag
-}
-
 int main(){
-
-	GPIO_Handle_t blue ={GPIOD,{GPIO_PIN_NO_15,GPIO_MODE_OUT,GPIO_SPEED_MEDIUM,GPIO_OTYPE_PP,GPIO_NO_PUPD}};
-	gpio_init(&blue);
-	GPIO_Handle_t red ={GPIOD,{GPIO_PIN_NO_14,GPIO_MODE_OUT,GPIO_SPEED_MEDIUM,GPIO_OTYPE_PP,GPIO_NO_PUPD}};
-	gpio_init(&red);
+	GPIO_Handle_t button_press_indicator ={GPIOD,{GPIO_PIN_NO_15,GPIO_MODE_OUT,GPIO_SPEED_MEDIUM,GPIO_OTYPE_PP,GPIO_NO_PUPD}};
+	gpio_init(&button_press_indicator);
 
 	GPIO_Handle_t gpioA_7segmentA ={GPIOC,{GPIO_PIN_NO_7,GPIO_MODE_OUT,GPIO_SPEED_MEDIUM,GPIO_OTYPE_PP,GPIO_NO_PUPD}};
 	GPIO_Handle_t gpioA_7segmentB ={GPIOC,{GPIO_PIN_NO_6,GPIO_MODE_OUT,GPIO_SPEED_MEDIUM,GPIO_OTYPE_PP,GPIO_NO_PUPD}};
@@ -156,15 +109,14 @@ int main(){
 
 
 	RCC->CFGR |= 0<<10; // set APB1 = 16 MHz
-	GPIO_Init();
-	TIM2_Init();
-	TIMER2->CR1 |= 1;
+	GPIO_Handle_t PA5 ={GPIOA,{GPIO_PIN_NO_5,GPIO_MODE_ALTERNATE,0,0,0,GPIO_AF1}};
+	gpio_init(&PA5);
+	pwm_init(TIMER_2, 16, 20000, 500);
 
-	update_of_7segment(numbers_of_7segment[nmbr]);
+	update_of_7segment(nmbr);
 
 	while(1){
 
-		//TIMER2->CCR1 = a*19.55;//19000;//a*1.8+500;
-
 	}
+
 }

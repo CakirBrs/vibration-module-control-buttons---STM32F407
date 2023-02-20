@@ -1,8 +1,7 @@
 /*
  * coreM4.c
  *
- *  Created on: 7 Oca 2023
- *      Author: metab
+ *      Author: Baris Cakir
  */
 #include "coreM4.h"
 
@@ -43,13 +42,6 @@ void systick_config(uint32_t tick){
 
 }
 
-
-/*
-void SysTick_Handler(){
-	//gpio_toggleto_output_pin(GPIOD, GPIO_PIN_NO_15);
-	++tmTickCount;
-}
-*/
 
 
 clock_t clock(){
