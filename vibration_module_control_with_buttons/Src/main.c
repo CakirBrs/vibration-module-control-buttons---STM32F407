@@ -56,7 +56,7 @@ void EXTI0_IRQHandler(void){
 		if(nmbr<9){
 			nmbr++;
 			update_of_7segment(nmbr);
-			TIMER2->CCR1 = nmbr*2222*3;
+			TIMER2->CCR1 = nmbr*2222;
 		}
 	}
 }
@@ -70,7 +70,7 @@ void EXTI1_IRQHandler(void){
 		if(nmbr>0){
 			nmbr--;
 			update_of_7segment(nmbr);
-			TIMER2->CCR1 = nmbr*2222*3;
+			TIMER2->CCR1 = nmbr*2222;
 		}
 	}
 }
